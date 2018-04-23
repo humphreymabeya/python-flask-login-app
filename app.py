@@ -11,27 +11,32 @@ def home():
     if not session.get('logged in'):
         return render_template('login.html')
     else:
-        return "hi, am your developer for today!!  <a href='/logout'>Logout</a>"
+        return "hi, am your developer for today!! Logged in as %s <a href='/logout'>Logout</a>" 
+
+
 @app.route('/login', methods = ['POST'])
 def admin_login():
     POST_USERNAME = str(request.form['username'])
     POST_PASSWORD = str(request.form['password'])
-
-    Session = sessionmaker(bind= engine)
+    print(POST_USERNAME)
+    print('===================')
+    print(POST_PASSWORD)
+    
+    Session = sessionmaker(bind=engine)
     s = Session()
-    query = s.query(User).filter(User.username.in_(POST_USERNAME), User.password.in_(POST_PASSWORD))
+    query = s.query(User).filter(User.username.in_([POST_USERNAME]), User.password.in_([POST_PASSWORD]) )
     result = query.first()
     if result:
-        # session['logged in'] == True
-        return render_template('tables.html')
+        session['logged in'] = True
     else:
-        flash('Invalid credentials!!')
+        flash('wrong password!')
     return home()
-@app.route('/logout')
+@app.route("/logout")
 def logout():
-    if session['logged_in'] == False:
-        return home()
+    session['logged in'] = False
+    return home()
 
+# app run
 if __name__ == "__main__":
     app.secret_key = os.urandom(12)
     app.run(debug=True, host='0.0.0.0', port=4000)
